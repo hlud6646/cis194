@@ -1,0 +1,27 @@
+{-# OPTIONS_GHC -Wall #-}
+module LogAnalysis where
+
+import Log
+import Text.Read
+
+main :: IO ()
+main = print "Hi!"
+
+
+
+
+-- -- Q1.
+-- parseMessage :: String -> LogMessage
+-- parseMessage s = case words s of 
+--                    ["I", time, msg]        -> LogMessage Info time msg
+--                    ["W", time, msg]        -> LogMessage Warning (read time :: Int) msg
+--                    ["E", level, time, msg] -> LogMessage (Error (read level :: Int)) (read time :: Int) msg
+--                    _                       -> Unknown s
+
+parseType :: String -> Maybe[MessageType]
+parseType s = case words s of 
+                "I" : _          -> Just[Info]
+                "W" : _          -> Just[Warning]
+                "E" : level : _  -> case (readMaybe level :: Int) of
+                                      Just[n] -> Just[Error n]
+                                      -- Nothing -> Nothing
