@@ -6,9 +6,6 @@ import Log
 import Data.Maybe
 import Text.Read
 
-main :: IO ()
-main = print "hi"
-
 -- The first char in the error should be I, W or E.
 -- If E, this must be followed by an integer.
 parseType :: [String] -> Maybe (MessageType, [String])
