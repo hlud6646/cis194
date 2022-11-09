@@ -13,10 +13,6 @@ main :: IO ()
 x = [1,4,5,4,6,6,3,4,2,4,9]
 main = putStr (worker . flipfreqs . freqs $ x)
 
-h = head
-d = drop
-l = length
-
 -- Given a list and an integer, return every nth element of that list.
 -- If the list is empty or if n is greater than the length of the list,
 -- then return the empty list. Otherwise drop the first n elements,
@@ -24,21 +20,26 @@ l = length
 nth :: [a] -> Int -> [a]
 nth [] _ = []
 nth x n 
-  | l x > n = ( h (d n x)) : (nth (d (n + 1) x) n)
+  | length x > n = ( head (drop n x)) : (nth (drop (n + 1) x) n)
   | otherwise = []
 
 -- Simply map over the range 1,2,...,length of the iterable
 -- using the function defined above partially applied.
 skips :: [a] -> [[a]]
-skips x = map (nth x ) [0..(l x) - 1] 
+skips x = map (nth x ) [0..(length x) - 1] 
 
 
 
 
+
+-- Predicate for a three element list being of the form [small, big, small]
 p :: [Integer] -> Bool
 p (a : b : c : _) = a < b && b > c
 p _ = False
 
+-- Return a list of the local maxima in an input list. 
+-- Traverse all tails (of length 3 or more) and check if the 
+-- first three elemens are [small, big, small].
 localMaxima :: [Integer] -> [Integer]
 localMaxima xs = map (!!1) (filter p (map (take 3) (tails xs)))
 
@@ -67,7 +68,7 @@ flipfreqs m = M.unionsWith (++) maps where
 
 -- Make a string for the the top line of the histogram.
 line :: M.Map Freq [Digit] -> String
-line m = (stars . snd . (maximumBy (comparing fst)) . M.toList $ m)
+line = stars . snd . (maximumBy (comparing fst)) . M.toList
 
 -- Print 10 characters, a space or a star depending on membership in xs
 stars :: [Digit] -> String
@@ -77,7 +78,7 @@ stars xs = foldr (++) "" (map p [0..9]) where
     | otherwise = " "
 
 -- Main recursive method. Make a string for the digit(s) with the highest frequency, 
--- decrement that digit/those digits and repeat.
+-- decrement that digit/those digits and repeat on the rest.
 worker :: M.Map Freq [Digit] -> String
 worker m 
   | null m = "==========\n0123456789\n"
@@ -86,6 +87,5 @@ worker m
                         (1, _)    -> M.deleteMax m
                         (n, digs) -> M.insertWith (++) (n-1) digs (M.deleteMax m)
 
-
 histogram :: [Integer] -> String
-histogram xs = worker . flipfreqs . freqs $ xs
+histogram = worker . flipfreqs . freqs
