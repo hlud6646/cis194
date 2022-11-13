@@ -1,17 +1,19 @@
 module Main where 
 
 -- import Data.List
-import Data.List (groupBy, sort, sortBy, tails, maximumBy)
-import Data.Tuple (swap)
-import Data.Maybe (fromJust)
-import Data.Ord (comparing)
-
-import qualified Data.Map as M
+import Data.List (tails, transpose, maximum)
 
 main :: IO ()
 
-x = [1,4,5,4,6,6,3,4,2,4,9]
-main = putStr (worker . flipfreqs . freqs $ x)
+x = [1,2,3,2,4,2,4,2,4]
+main = print (localMaxima x)
+
+
+
+-- Simply map over the range 1,2,...,length of the iterable
+-- using the function defined above partially applied.
+skips :: [a] -> [[a]]
+skips x = map (nth x ) [0..(length x) - 1] 
 
 -- Given a list and an integer, return every nth element of that list.
 -- If the list is empty or if n is greater than the length of the list,
@@ -23,69 +25,39 @@ nth x n
   | length x > n = ( head (drop n x)) : (nth (drop (n + 1) x) n)
   | otherwise = []
 
--- Simply map over the range 1,2,...,length of the iterable
--- using the function defined above partially applied.
-skips :: [a] -> [[a]]
-skips x = map (nth x ) [0..(length x) - 1] 
 
 
 
-
-
--- Predicate for a three element list being of the form [small, big, small]
-p :: [Integer] -> Bool
-p (a : b : c : _) = a < b && b > c
-p _ = False
 
 -- Return a list of the local maxima in an input list. 
 -- Traverse all tails (of length 3 or more) and check if the 
 -- first three elemens are [small, big, small].
 localMaxima :: [Integer] -> [Integer]
 localMaxima xs = map (!!1) (filter p (map (take 3) (tails xs)))
+  where p (a : b : c : _) = a < b && b > c
+        p _ = False
 
 
 
 
 
 
-
-
-
-
-
-
-type Freq = Integer
-type Digit = Integer
-
--- Frequency of digits in the input.
-freqs :: [Digit] -> M.Map Digit Freq
-freqs xs = M.unionsWith (+) (map (\x -> M.fromList [(x, 1)]) xs)
-
--- Flip it so that the frequency is the key, to a list of digits with that freq.
-flipfreqs :: M.Map Digit Freq -> M.Map Freq [Digit]
-flipfreqs m = M.unionsWith (++) maps where
-  maps = map (\x -> M.fromList [(fst x, [snd x])]) (map swap (M.toList m))
-
--- Make a string for the the top line of the histogram.
-line :: M.Map Freq [Digit] -> String
-line = stars . snd . (maximumBy (comparing fst)) . M.toList
-
--- Print 10 characters, a space or a star depending on membership in xs
-stars :: [Digit] -> String
-stars xs = foldr (++) "" (map p [0..9]) where
-  p n 
-    | elem n xs = "*"
-    | otherwise = " "
-
--- Main recursive method. Make a string for the digit(s) with the highest frequency, 
--- decrement that digit/those digits and repeat on the rest.
-worker :: M.Map Freq [Digit] -> String
-worker m 
-  | null m = "==========\n0123456789\n"
-  | otherwise =  (line m) ++ "\n" ++ (worker . decrementMax $ m) where 
-    decrementMax m = case (M.findMax m) of
-                        (1, _)    -> M.deleteMax m
-                        (n, digs) -> M.insertWith (++) (n-1) digs (M.deleteMax m)
-
+-- Print a histogram given a list of numbers.
 histogram :: [Integer] -> String
-histogram = worker . flipfreqs . freqs
+histogram xs = title . reverse . unlines . transpose . padAll $ (map star (count xs))
+  where title s = s ++ "\n==========\n0123456789\n"
+
+count :: [Integer] -> [Int]
+count xs = map (\d -> length (filter (==d) xs)) [0..9]
+
+star :: Int -> String
+star n = replicate n '*'
+
+pad :: Int-> [Char] -> [Char]
+pad m x
+  | m == length x = x
+  | otherwise = pad m (x ++ " ")
+
+padAll :: [String] -> [String]
+padAll xs = map (pad m) xs where
+  m = maximum (map length xs)
