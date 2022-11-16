@@ -27,19 +27,83 @@ fun2 = sum . filter (even) . iterate collatz where
     | otherwise = 3 * n + 1
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- 2. Folding Trees.
--- TODO; need to implement a recursive AVL tree :/
--- This course is heavy.
+--    The task is to use a fold to build a balanced tree from a 
+--    given list. Don't be spooked, you don't need to implement 
+--    a full AVL tree since all that is required is a tree that 
+--    isn't useful for anything, since there is no context on a
+--    requiring it to be ordeered.
+--
+--    I feel like this would be easier to do without a fold, si
+--    -mply splittling a list at its midpoint and making subtre
+--    -es of each sublist, then joining at a node...
 data Tree a = Leaf
             | Node Integer (Tree a) a (Tree a)
   deriving (Show, Eq)
+
+
+
+
+
+
+
+
+
+
 
 -- Make a tree from a list of elements.
 foldTree :: [a] -> Tree a
 foldTree = foldr insert Leaf
 
 insert :: a -> Tree a -> Tree a 
-insert _ _ = Leaf
+insert x Leaf = Node 1 Leaf Leaf
+insert x Node 1 Leaf Leaf = Node 2 (Node 1 Leaf Leaf) Leaf
+insert x Node h ()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- 3. More folds.
