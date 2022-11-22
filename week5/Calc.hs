@@ -1,11 +1,9 @@
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# OPTIONS_GHC -Wall #-}
 
 module Calc where
 
 import ExprT
 import Parser
-import StackVM
 
 main :: IO ()
 main = print "hi!"
@@ -69,5 +67,4 @@ instance Expr Mod7 where
 
 testExp :: Expr a => Maybe a
 testExp = parseExp lit add mul "(3 * -4) + 5"
-
 
