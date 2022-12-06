@@ -77,3 +77,21 @@ instance Fractional (Stream Integer) where
 fibs3 :: Stream Integer
 fibs3 = x / (1 - x - x^2)
 
+
+-- 7. Fibonacci via matrix multiplication. O(log n).
+
+-- 2x2 integer matrix.
+data Matrix = Matrix Integer Integer Integer Integer
+  deriving Show
+
+-- a b . w x   =   aw + by   ax + bz
+-- c d   y z       cw + dy   cx + dz
+instance Num Matrix where
+  (*) (Matrix a b c d) (Matrix w x y z) = Matrix (a*w + b*y) (a*x + b*z) (c*w + d*y) (c*x + d*z)
+
+fib4 :: Integer -> Integer
+fib4 n = a00 (f^n) where
+  a00 (Matrix a _ _ _) = a
+  f = Matrix 1 1 1 0
+
+
