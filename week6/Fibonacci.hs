@@ -31,7 +31,6 @@ data Stream a = a :~ (Stream a)
 instance Show a => Show (Stream a) where 
   show xs = show (take 32 (streamToList xs)) ++ "..."
 
-
 streamToList :: Stream a -> [a]
 streamToList (x :~ xs) = x : (streamToList xs)
 
@@ -58,10 +57,8 @@ ruler = level 0 where
 (~~) :: Stream a -> Stream a -> Stream a
 (~~) (x :~ xs) ys = x :~ (ys ~~ xs)
 
-
 -- 6. Fibonacci via Generating Functions.
 x :: Stream Integer
--- x = Stream 0 (Stream 1 (streamRepeat 0))
 x = 0 :~ 1 :~ (streamRepeat 0)
 
 instance Num (Stream Integer) where
@@ -76,7 +73,6 @@ instance Fractional (Stream Integer) where
 
 fibs3 :: Stream Integer
 fibs3 = x / (1 - x - x^2)
-
 
 -- 7. Fibonacci via matrix multiplication. O(log n).
 
@@ -93,5 +89,3 @@ fib4 :: Integer -> Integer
 fib4 n = a00 (f^n) where
   a00 (Matrix a _ _ _) = a
   f = Matrix 1 1 1 0
-
-
