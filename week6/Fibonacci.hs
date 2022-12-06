@@ -23,7 +23,7 @@ fibs2 = 0 : 1 : (map (\xs -> (fst xs) + (snd xs)) (zip fibs2 (tail fibs2)))
 
 -- 3. Streams
 -- Like a list, but without an empty.
--- Note that you can have an infix type constructor so long as its symbol
+-- Note that you can have an infix data constructor so long as its symbol
 -- starts with ':'.
 infixr 5 :~
 data Stream a = a :~ (Stream a)
