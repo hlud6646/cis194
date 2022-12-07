@@ -49,7 +49,7 @@ bools3  = [(x, y, z) | x <- bools, y <- bools, z <- bools]
 bools4 :: [(Bool, Bool, Bool, Bool)]
 bools4 = [(w, x, y, z) | w <- bools, x <- bools, y <- bools, z <- bools]
 
--- Check (a . b) . c = a . (b . c) 
+-- Check (a . b) . c == a . (b . c) 
 checkOne :: BinaryOp -> (Bool, Bool, Bool) -> Bool
 checkOne f (a, b, c) = f (f a b) c == f a (f b c)
 
