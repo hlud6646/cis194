@@ -1,4 +1,7 @@
+module JoinList where
+
 import Sized
+import Scrabble
 
 data JoinList m a  = Empty
                    | Single m a
@@ -49,12 +52,6 @@ takeJ n (Append _ l r)
 takeJ n _ | n < 1 = Empty
 takeJ _ x = x
 
-
-
-
-
-
-
 -- |Safely get the element in a list a given index.
 (!!?) :: [a] -> Int -> Maybe a
 []       !!? _         = Nothing
@@ -75,3 +72,9 @@ are   = Single 1 "are"   :: JoinList Size String
 you   = Single 1 "you"   :: JoinList Size String
 
 jl = (hi +++ there) +++ how +++ (are +++ you)
+
+-- 3. Scrabble scoring.
+scoreLine :: String -> JoinList Score String
+scoreLine s = Single x s where 
+  x = sum $ map score s
+
