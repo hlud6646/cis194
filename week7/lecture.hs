@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 
 module Lecture where 
 
@@ -30,52 +31,52 @@ type BinaryOp = Bool -> Bool -> Bool
 instance Show BinaryOp where
   show f = show (foldr (++) "" actions) where
     actions = zipWith (\x y -> concat ["  ", x, " |-> ",y, "  "])  ins outs
-    ins     = map (\(x, y) -> show' x ++ show' y)  bools2
-    outs    = map show' (map (uncurry f) bools2)
+    ins     = map (\(x, y) -> show' x ++ show' y)  b2
+    outs    = map (show' . uncurry f) b2
 
 show' :: Bool -> String
 show' True  = "T"
 show' False = "F"
 
-bools  :: [Bool]
-bools   = [True, False]
+b  :: [Bool]
+b   = [True, False]
 
-bools2 :: [(Bool, Bool)]
-bools2  = [(x, y) | x <- bools, y <- bools]
+b2 :: [(Bool, Bool)]
+b2  = [(x, y) | x <- b, y <- b]
 
-bools3 :: [(Bool, Bool, Bool)]
-bools3  = [(x, y, z) | x <- bools, y <- bools, z <- bools]
+b3 :: [(Bool, Bool, Bool)]
+b3  = (,,) <$> b <*> b <*> b
 
-bools4 :: [(Bool, Bool, Bool, Bool)]
-bools4 = [(w, x, y, z) | w <- bools, x <- bools, y <- bools, z <- bools]
+b4 :: [(Bool, Bool, Bool, Bool)]
+b4 = (,,,) <$> b <*> b <*> b <*> b
 
 -- Check (a . b) . c == a . (b . c) 
 checkOne :: BinaryOp -> (Bool, Bool, Bool) -> Bool
-checkOne f (a, b, c) = f (f a b) c == f a (f b c)
+checkOne f (x, y, z) = f (f x y) z == f x (f y z)
 
 -- Check whether a given binary operator is associative.
 associative :: BinaryOp -> Bool
-associative f = all (checkOne f) bools3
+associative f = all (checkOne f) b3
 
 -- A BinaryOp is fully described by its image, i.e. the values to which 
 -- its four inputs are mapped. So from a tuple of four boolans we can
 -- easily create an anonymous BinaryOp. 
-op_from_img :: (Bool, Bool, Bool, Bool) -> BinaryOp
-op_from_img (a, b, c, d) = g where
-  g True True   = a
-  g True False  = b
-  g False True  = c
-  g False False = d
+opFromImg :: (Bool, Bool, Bool, Bool) -> BinaryOp
+opFromImg (w, x, y, z) = g where
+  g True True   = w
+  g True False  = x
+  g False True  = y
+  g False False = z
 
 -- For example:
 and' :: BinaryOp
-and' = op_from_img (True, False, False, False)
+and' = opFromImg (True, False, False, False)
 
 allBinaryOps :: [BinaryOp]
-allBinaryOps = map op_from_img bools4
+allBinaryOps = map opFromImg b4
 
-associative_ops :: [BinaryOp]
-associative_ops = filter associative allBinaryOps
+associativeOps :: [BinaryOp]
+associativeOps = filter associative allBinaryOps
 
 -- Here they are.
 -- "  TT |-> T    TF |-> T    FT |-> T    FF |-> T  " ... constant True
@@ -90,18 +91,18 @@ associative_ops = filter associative allBinaryOps
 -- Now check that one of t/f is neutral.
 
 -- Check if b is neutral for f.
-is_neutral :: BinaryOp -> Bool -> Bool
-is_neutral f b = and $ map (\x -> f b x == f x b && f x b == x) [True, False]
+isNeutral :: BinaryOp -> Bool -> Bool
+isNeutral f e = all (\x -> f e x == f x e && f x e == x) [True, False]
 
 -- Find a (the) neutral element for an operator if it exists.
 neutral :: BinaryOp -> Maybe Bool
 neutral f
-  | is_neutral f True  = Just True
-  | is_neutral f False = Just False
+  | isNeutral f True  = Just True
+  | isNeutral f False = Just False
   | otherwise          = Nothing
 
 neutrals :: [Maybe Bool]
-neutrals = map neutral associative_ops
+neutrals = map neutral associativeOps
 
 -- At long last here they are:
 --
@@ -113,5 +114,3 @@ neutrals = map neutral associative_ops
 -- ("  TT |-> T    TF |-> F    FT |-> F    FF |-> F  ",Just True)
 -- ("  TT |-> F    TF |-> T    FT |-> T    FF |-> F  ",Just False)
 -- ("  TT |-> F    TF |-> F    FT |-> F    FF |-> F  ",Nothing)
-
-
