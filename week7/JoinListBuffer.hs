@@ -14,7 +14,8 @@ instance Buffer (JoinList (Score, Size) String)  where
 
   toString = unwords . jlToList
 
-  fromString s =  foldr (+++) Empty (map scoreLine (lines s))
+  fromString s =  foldr (+++) Empty xs where
+    xs = map (\x -> Single (scoreString  x, ???) x) (lines s)
   
   line = indexJ
 
