@@ -25,8 +25,8 @@ instance Monoid Score where
   mempty = Score 0
 
 score :: Char -> Score
-score c = fromMaybe 0 (snd <$> x) where
-  x = find (\(chars, value) -> elem c chars) scoreData
+score c = maybe 0 snd x where
+  x = find (\(chars, value) -> c `elem` chars) scoreData
 
 scoreString :: String -> Score
 scoreString = sum . map score
