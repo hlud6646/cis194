@@ -16,6 +16,9 @@ instance Monoid GuestList where
 moreFun :: GuestList -> GuestList -> GuestList
 moreFun = max
 
-treeFold :: b -> ([b] -> a -> b) -> Tree a -> b
-treeFold e f (Node a []) = f [e] a
-treeFold e f (Node x as) = f (map (treeFold e f) as) x
+treeFold :: b               -- The initial value of the accumulator.
+        -> (a -> [b] -> b)  -- How to describe this argument?
+        -> Tree a           -- The tree which is folded over.
+        -> b                -- Returns the final accumulator.
+treeFold e f (Node a tas) =  f a (map (treeFold e f) tas)
+
