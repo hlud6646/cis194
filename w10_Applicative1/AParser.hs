@@ -72,8 +72,36 @@ instance Applicative Parser where
 abParser :: Parser (Char, Char)
 abParser = (,) <$> (char 'a') <*> (char 'b')
 
+-- In stead of keeping the matched part and the rest, return () and the rest.
+consume :: Parser a -> Parser ()
+consume p = pure (const ()) <*> p
+
 -- Give an () if a then immediately b.
 abParser_ :: Parser ()
-abParser_ = pure (const ()) <*> abParser
+abParser_ = consume abParser
+
+takeSpace :: Parser [a]
+takeSpace = pure(const []) <*> char ' '
+
+threeToOne :: [a] -> [a] -> [a] -> [a]
+threeToOne a b c = a ++ b ++ c
+
+-- Extract an Integer and wrap it in a list.
+wrappedInt :: Parser [Integer]
+wrappedInt = (:) <$> posInt <*> pure ([])
 
 intPair :: Parser [Integer]
+intPair = threeToOne <$> wrappedInt <*> takeSpace <*> wrappedInt
+
+instance Alternative Parser where 
+  empty = Parser f where f = const Nothing
+  (<|>) (Parser f) (Parser g) = Parser h where
+    h s = case f s of 
+      Nothing -> g s
+      x@_     -> x
+
+consumeInt   = consume posInt
+consumeUpper = consume (satisfy isUpper)
+
+intOrUppercase :: Parser ()
+intOrUppercase = consumeInt <|> consumeUpper
