@@ -94,11 +94,13 @@ intPair :: Parser [Integer]
 intPair = threeToOne <$> wrappedInt <*> takeSpace <*> wrappedInt
 
 instance Alternative Parser where 
-  empty = Parser f where f = const Nothing
+  empty = Parser (const Nothing)
   (<|>) (Parser f) (Parser g) = Parser h where
     h s = case f s of 
       Nothing -> g s
       x@_     -> x
+
+
 
 consumeInt   = consume posInt
 consumeUpper = consume (satisfy isUpper)
