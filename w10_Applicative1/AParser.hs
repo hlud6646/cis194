@@ -1,10 +1,12 @@
+{- CIS 194 HW 10
+   due Monday, 1 April
+-}
+
 module AParser where
 
 import           Control.Applicative
 
 import           Data.Char
-
-import           Data.Tuple.Extra (first)
 
 -- A parser for a value of type a is a function which takes a String
 -- represnting the input to be parsed, and succeeds or fails; if it
@@ -55,55 +57,36 @@ posInt = Parser f
 ------------------------------------------------------------
 -- Your code goes below here
 ------------------------------------------------------------
+first :: (a -> b) -> (a, c) -> (b, c)
+first f (x, y) = (f x, y)
+
 instance Functor Parser where
-    fmap f (Parser g) = Parser h where
-        h s = fmap (first f) (g s)
+  fmap f (Parser g) = Parser (\s -> fmap (first f) (g s))
 
 instance Applicative Parser where
-    pure a = Parser f where f s = Just (a, s)
-    Parser f <*> Parser h = Parser g where
-        g s = case (f s) of
-            Just (j, rest) -> fmap (first j) (h rest)
-            Nothing        -> Nothing
+  pure a = Parser (\s -> Just (a, s))
+  (<*>) (Parser f) (Parser g) = Parser (\s -> case (f s) of
+      Just (h, rest) -> fmap (first h) (g rest)
+      otherwise      -> Nothing)
 
--- Examples.
-
--- Look for an 'a', then immediately a 'b'.
 abParser :: Parser (Char, Char)
 abParser = (,) <$> (char 'a') <*> (char 'b')
 
--- In stead of keeping the matched part and the rest, return () and the rest.
-consume :: Parser a -> Parser ()
-consume p = pure (const ()) <*> p
-
--- Give an () if a then immediately b.
 abParser_ :: Parser ()
-abParser_ = consume abParser
+abParser_ = squash abParser
 
-takeSpace :: Parser [a]
-takeSpace = pure(const []) <*> char ' '
-
-threeToOne :: [a] -> [a] -> [a] -> [a]
-threeToOne a b c = a ++ b ++ c
-
--- Extract an Integer and wrap it in a list.
 wrappedInt :: Parser [Integer]
-wrappedInt = (:) <$> posInt <*> pure ([])
+wrappedInt = (:) <$> posInt <*> pure([])
 
 intPair :: Parser [Integer]
-intPair = threeToOne <$> wrappedInt <*> takeSpace <*> wrappedInt
+intPair = (++) <$> wrappedInt <* (pure (const []) <*> char ' ') <*> wrappedInt
 
-instance Alternative Parser where 
+instance Alternative Parser where
   empty = Parser (const Nothing)
-  (<|>) (Parser f) (Parser g) = Parser h where
-    h s = case f s of 
-      Nothing -> g s
-      x@_     -> x
+  (<|>) (Parser f) (Parser g) = Parser (liftA2 (<|>) f g)
 
-
-
-consumeInt   = consume posInt
-consumeUpper = consume (satisfy isUpper)
+squash :: Parser a -> Parser ()
+squash = (<*>) (pure (const ()))
 
 intOrUppercase :: Parser ()
-intOrUppercase = consumeInt <|> consumeUpper
+intOrUppercase = (squash posInt) <|> (squash (satisfy isUpper))
