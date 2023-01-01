@@ -79,7 +79,7 @@ wrappedInt :: Parser [Integer]
 wrappedInt = (:) <$> posInt <*> pure([])
 
 intPair :: Parser [Integer]
-intPair = (++) <$> wrappedInt <* (pure (const []) <*> char ' ') <*> wrappedInt
+intPair = (++) <$> wrappedInt <* (char ' ') <*> wrappedInt
 
 instance Alternative Parser where
   empty = Parser (const Nothing)
