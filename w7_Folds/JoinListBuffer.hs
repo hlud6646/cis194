@@ -18,7 +18,7 @@ fromLines :: [String] -> JoinList (Score, Size) String
 fromLines []  = Empty
 fromLines [l] = fromLine l
 fromLines ls  = l +++ r where
-    split = (length ls) `div` 2
+    split = length ls `div` 2
     l = fromLines $ take split ls
     r = fromLines $ drop split ls
 

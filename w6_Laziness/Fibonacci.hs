@@ -19,7 +19,7 @@ fibs1 = map fib [0..]
 
 -- 2. First n elements in O(n) time.
 fibs2 :: [Integer]
-fibs2 = 0 : 1 : (map (\xs -> (fst xs) + (snd xs)) (zip fibs2 (tail fibs2)))
+fibs2 = 0 : 1 : map (\xs -> (fst xs) + (snd xs)) (zip fibs2 (tail fibs2))
 
 -- 3. Streams
 -- Like a list, but without an empty.
@@ -32,17 +32,17 @@ instance Show a => Show (Stream a) where
   show xs = show (take 32 (streamToList xs)) ++ "..."
 
 streamToList :: Stream a -> [a]
-streamToList (x :~ xs) = x : (streamToList xs)
+streamToList (x :~ xs) = x : streamToList xs
 
 -- 4. Enriching streams.
 streamRepeat :: a -> Stream a
-streamRepeat x = x :~ (streamRepeat x)
+streamRepeat x = x :~ streamRepeat x
 
 streamMap :: (a -> b) -> Stream a -> Stream b
-streamMap f (x :~ xs) = (f x) :~ (streamMap f xs)
+streamMap f (x :~ xs) = (f x) :~ streamMap f xs
 
 streamFromSeed :: (a -> a) -> a -> Stream a
-streamFromSeed f x = x :~ (streamFromSeed f (f x))
+streamFromSeed f x = x :~ streamFromSeed f (f x)
 
 -- 5. Creating some streams.
 nats :: Stream Integer
@@ -51,7 +51,7 @@ nats = streamFromSeed (+1) 0
 -- the nth element is the highest power of 2 that divides n.
 ruler :: Stream Integer
 ruler = level 0 where
-  level n = (streamRepeat n) ~~ (level $ n+1)
+  level n = streamRepeat n ~~ level (n + 1)
 
 -- Interleave two streams. abc.. ~~ 123.. becomes a1b2c3.. 
 (~~) :: Stream a -> Stream a -> Stream a
@@ -59,17 +59,17 @@ ruler = level 0 where
 
 -- 6. Fibonacci via Generating Functions.
 x :: Stream Integer
-x = 0 :~ 1 :~ (streamRepeat 0)
+x = 0 :~ 1 :~ streamRepeat 0
 
 instance Num (Stream Integer) where
-  fromInteger n = n :~ (streamRepeat 0)
-  negate s = streamMap negate s
+  fromInteger n = n :~ streamRepeat 0
+  negate = streamMap negate
   (+) (a :~ as) (b :~ bs) = (a+b) :~ (as + bs)
-  (*) (a :~ as) (b :~ bs) = (a*b) :~ (streamMap (*a) bs) + (as * (b :~ bs))
+  (*) (a :~ as) (b :~ bs) = (a*b) :~ streamMap (*a) bs + (as * (b :~ bs))
 
 instance Fractional (Stream Integer) where
   (/) (a :~ as) (b :~ bs) = q where
-    q = (a `div` b) :~ (streamMap (`div` b) (as - q*bs))
+    q = (a `div` b) :~ streamMap (`div` b) (as - q*bs)
 
 fibs3 :: Stream Integer
 fibs3 = x / (1 - x - x^2)

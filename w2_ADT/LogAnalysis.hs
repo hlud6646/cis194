@@ -51,12 +51,12 @@ insert _ tree = tree
 
 -- Q3. Build a message tree from a list of messages.
 build :: [LogMessage] -> MessageTree
-build xs = foldr insert Leaf xs
+build = foldr insert Leaf
 
 -- Q4. Traverse a tree in order.
 inOrder :: MessageTree -> [LogMessage]
 inOrder Leaf = []
-inOrder (Node l msg r) = (inOrder l) ++ [msg] ++ (inOrder r)
+inOrder (Node l msg r) = inOrder l ++ [msg] ++ inOrder r
 
 -- Q5. 
 whatWentWrong :: [LogMessage] -> [String]

@@ -61,25 +61,25 @@ first :: (a -> b) -> (a, c) -> (b, c)
 first f (x, y) = (f x, y)
 
 instance Functor Parser where
-  fmap f (Parser g) = Parser (\s -> fmap (first f) (g s))
+  fmap f (Parser g) = Parser (fmap (first f) . g)
 
 instance Applicative Parser where
   pure a = Parser (\s -> Just (a, s))
-  (<*>) (Parser f) (Parser g) = Parser (\s -> case (f s) of
+  (<*>) (Parser f) (Parser g) = Parser (\s -> case f s of
       Just (h, rest) -> fmap (first h) (g rest)
-      otherwise      -> Nothing)
+      _      -> Nothing)
 
 abParser :: Parser (Char, Char)
-abParser = (,) <$> (char 'a') <*> (char 'b')
+abParser = (,) <$> char 'a' <*> char 'b'
 
 abParser_ :: Parser ()
 abParser_ = squash abParser
 
 wrappedInt :: Parser [Integer]
-wrappedInt = (:) <$> posInt <*> pure([])
+wrappedInt = (:) <$> posInt <*> pure []
 
 intPair :: Parser [Integer]
-intPair = (++) <$> wrappedInt <* (char ' ') <*> wrappedInt
+intPair = (++) <$> wrappedInt <* char ' ' <*> wrappedInt
 
 instance Alternative Parser where
   empty = Parser (const Nothing)
@@ -89,4 +89,4 @@ squash :: Parser a -> Parser ()
 squash = (<*>) (pure (const ()))
 
 intOrUppercase :: Parser ()
-intOrUppercase = (squash posInt) <|> (squash (satisfy isUpper))
+intOrUppercase = squash posInt <|> squash (satisfy isUpper)

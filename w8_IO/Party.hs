@@ -31,7 +31,7 @@ nextLevel boss pairs = (withBoss, withoutBoss) where
     withoutBoss = mconcat  $ map (uncurry moreFun) pairs  -- For each subdepartment, choose the most fun list since this boss isn't coming anyway.
 
 maxFun :: Tree Employee -> GuestList
-maxFun boss = (uncurry max) (treeFold (mempty, mempty) nextLevel boss)
+maxFun boss = uncurry max (treeFold (mempty, mempty) nextLevel boss)
 
 -- Extractors for GuestList
 totalFun :: GuestList -> Fun
@@ -41,7 +41,7 @@ empNames (GL es _) = sort $ map empName es
 
 display :: GuestList -> IO ()
 display gl = do 
-    putStrLn . show $ totalFun gl
+    print $ totalFun gl
     mapM_ putStrLn (empNames gl)
 
 main = do

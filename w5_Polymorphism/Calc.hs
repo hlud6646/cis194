@@ -12,15 +12,13 @@ main = print "hi!"
 -- 1. Evaluate an expression.
 eval :: ExprT -> Integer
 eval (Lit n) = n
-eval (Add e1 e2) = (eval e1) + (eval e2)
-eval (Mul e1 e2) = (eval e1) * (eval e2)
-
+eval (Add e1 e2) = eval e1 + eval e2
+eval (Mul e1 e2) = eval e1 * eval e2
 
 -- 2. With expression parsing.
 evalStr :: String -> Maybe Integer
 evalStr s = fmap eval maybeExp where
   maybeExp = parseExp Lit Add Mul s
-
 
 -- 3. Type-class for expressions.
 class Expr a where
@@ -29,10 +27,9 @@ class Expr a where
   mul :: a -> a -> a
 
 instance Expr ExprT where
-  lit n = Lit n
-  add e1 e2 = Add e1 e2
-  mul e1 e2 = Mul e1 e2
-
+  lit = Lit
+  add = Add
+  mul = Mul
 
 -- 4. More type-class instances.
 instance Expr Integer where
@@ -50,7 +47,7 @@ instance Expr Bool where
 newtype MinMax = MinMax Integer deriving (Eq, Show)
 
 instance Expr MinMax where
-  lit x = MinMax x
+  lit = MinMax
   add (MinMax x) (MinMax y)
     | x > y = MinMax x
     | otherwise = MinMax y
@@ -67,4 +64,3 @@ instance Expr Mod7 where
 
 testExp :: Expr a => Maybe a
 testExp = parseExp lit add mul "(3 * -4) + 5"
-

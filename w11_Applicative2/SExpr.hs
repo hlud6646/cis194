@@ -36,14 +36,14 @@ spaces = zeroOrMore (satisfy isSpace)
 type Ident = String
 
 ident :: Parser String
-ident = (:) <$> (satisfy isAlpha) <*> zeroOrMore (satisfy isAlphaNum)
+ident = (:) <$> satisfy isAlpha <*> zeroOrMore (satisfy isAlphaNum)
 
 -- An "atom" is either an integer value or an identifier.
 data Atom = N Integer | I Ident
   deriving Show
 
 atom :: Parser Atom
-atom = (fmap N posInt) <|> (fmap I ident)
+atom = fmap N posInt <|> fmap I ident
 
 -- An S-expression is either an atom, or a list of S-expressions.
 data SExpr = A Atom
